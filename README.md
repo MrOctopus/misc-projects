@@ -8,6 +8,14 @@ using them.
 ### papyrusdrm.cpp
 Exploits a bug in the champollion.exe decompiler by randomizing the compiler debug timestamp in a compiled papyrus file (.pex). Champollion expects the timestamp to be a 32 bit int, but in reality it is stored as a 64 bit int. Using the remaining bits crashes Champollion, but keeps the compiled script working in game. This effectively enforces a DRM upon the compiled script file. Reversing the process can be done through a hex-editor.
 
+## Papyrus
+
+### nl_util.psc
+A papyrus utility script for key, value storage. Only requires SKSE. Example:
+* keyname2
+    - value
+    - value
+
 ## Pascal
 
 ### nl_BatchParallax.pas
