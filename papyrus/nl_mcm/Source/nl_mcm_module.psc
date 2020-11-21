@@ -446,7 +446,7 @@ function UnloadCustomContent()
 	MCM.UnloadCustomContent()
 endfunction
 
-int function ShowMessage(string a_message, bool a_withCancel = true, string a_acceptLabel = "$Accept", string a_cancelLabel = "$Cancel")
+bool function ShowMessage(string a_message, bool a_withCancel = true, string a_acceptLabel = "$Accept", string a_cancelLabel = "$Cancel")
 	return MCM.ShowMessage(a_message, a_withCancel, a_acceptLabel, a_cancelLabel)
 endfunction
 
