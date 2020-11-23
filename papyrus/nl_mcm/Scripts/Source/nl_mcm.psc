@@ -437,14 +437,19 @@ int function SaveMCMToPreset(string preset_name)
 	_mutex_modules = true
 	
 	int i = 0
-	while i < Pages.Length	
-		JMap.setObj(jPreset, Pages[i], _modules[i].SaveData())
+	while i < Pages.Length
+		int jData = _modules[i].SaveData()
+		if jData > 0
+			JMap.setObj(jPreset, Pages[i], jData)
+		endif
 		i += 1
 	endwhile
 	
-	_mutex_modules = false	
+	_mutex_modules = false
 	
-	JValue.writeTofile(jPreset, MCM_PATH_SETTINGS + preset_name + MCM_EXT)
+	if JMap.count(jPreset) > 0
+		JValue.writeTofile(jPreset, MCM_PATH_SETTINGS + preset_name + MCM_EXT)
+	endif
 	
 	_busy_jcontainer = false
 	
@@ -485,7 +490,10 @@ int function LoadMCMFromPreset(string preset_name, bool no_ext)
 	
 	int i = 0
 	while i < Pages.Length
-		_modules[i].LoadData(JMap.getObj(jPreset, Pages[i]))
+		int jData = JMap.getObj(jPreset, Pages[i])
+		if jData > 0
+			_modules[i].LoadData(jData)
+		endif
 		i += 1
 	endwhile
 	
