@@ -15,8 +15,38 @@ class Type:
     FUNCTION = "function"
 
 class Doc:
-    def __init__(self):
-        self.name = ""
+    START_DOC = '{'
+    END_DOC = '}'
+
+    @classmethod
+    def from_file(file):
+        previous_line = ""
+
+        while True:
+            line = file.readline()
+
+            if not line:
+                throw Exception
+
+            line = line.strip()
+
+            if line[0] is Doc.START_DOC:
+                pass
+            else:
+                previous_line = line
+
+    def __init__(self, name, name_full, description = "", params = None, return_val = ""):
+        self.name = name
+        self.name_full = name_full
+        
+        if description:
+            self.description = description
+
+        if params:
+            self.params = params
+
+        if return_val:
+            self.return_val = return_val
         
     def __eq__(self, other):
         return self.name == other.name
@@ -28,12 +58,22 @@ class Doc:
         # TODO(NeverLost): Convert to md
         return ""
 
-class Doc_Data:
-    def __init__(self, name : String, author = "" : String, version = 1 : int):
+class File_Doc:
+    @classmethod
+    def from_file(file_name : str, file):
+        line = file.readline()
+        
+        if not line:
+            throw Exception
+            
+        if line.lower().find(file_name.lower()) != 11:
+            throw Exception
+            
+        #return cls(Doc_File(file_name, file, line))
+
+    def __init__(self, doc):
         # Primary
-        self.name = name
-        self.author = author
-        self.version = version
+        self.doc = doc
         
         # Secondary
         self.properties = []
@@ -52,7 +92,7 @@ class Doc_Data:
         elif doc.type is Type.EVENT:
             self.events.append(doc)
         elif doc.type is Type.FUNCTION:
-            slef.functions.append(doc)
+            self.functions.append(doc)
     
     def sort(self):
         self.properties.sort()
@@ -60,7 +100,7 @@ class Doc_Data:
         self.functions.sort()
 
 def generate_md(doc_data):
-    if doc_data is None:
+    if not isinstance(doc_data, Doc_Data):
         return
         
     if doc_data.isempty():
@@ -70,31 +110,36 @@ def generate_md(doc_data):
         
     # TODO(NeverLost): Generate md
 
-def parse_file(file_path : String):
-    if not file_path.lower().endswith(".dds"):
+def parse_file(file_path : str):
+    if not file_path.lower().endswith(".psc"):
         return
     
     if not path.isfile(file_path):
         return
     
-    name = path.splitext(path.basename(file_path))[0].lower()
-    file = open(file_path, 'r')
+    file_name = path.splitext(path.basename(file_path))[0]
     
-    if file.readline().find(name) != 11:
-        return
-    
-    # TODO(NeverLost): Generate docs
-    
-    file.close()
+    with open(file_path, 'r') as file:
+        try:
+            file_doc = File_Doc(file_name, file)
+        except Exception:
+            return
 
-def main(file_path : String):  
+        while True:
+            try:
+                doc = Doc.from_file(file)
+                file_doc.add(doc)
+            except Exception:
+                break
+
+def main(file_path : str):  
     if len(sys.argv) == 1:
         return
 
     # TODO(NeverLost): Support multiple args
     # TODO(NeverLost): Use argparse
-    for file in sys.argv[1:]:
-        doc_data = parse_file(file)
+    for file_path in sys.argv[1:]:
+        doc_data = parse_file(file_path)
         generate_md(doc_data)
 
 if __name__ is "__main__":
