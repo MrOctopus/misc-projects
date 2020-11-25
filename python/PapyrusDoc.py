@@ -18,6 +18,9 @@ class Doc:
     START_DOC = '{'
     END_DOC = '}'
 
+    # TODO(NeverLost):
+    # Maybe we need to create a factory
+    # This should not be inherited
     @classmethod
     def from_file(file):
         previous_line = ""
@@ -25,24 +28,20 @@ class Doc:
         while line := file.readline():
             line = line.strip()
 
-            if line[0] is Doc.START_DOC:
+            if line[0] is cls.START_DOC:
                 # Read different types here
                 # Throw exceptions on malformed comments
-                pass
+                break
             else:
                 previous_line = line
 
         # EOF
         return None
 
-    @from_line
-
-    def __init__(self, name, name_full, description = None, params = None, return_val = None):
+    def __init__(self, name, name_full, description = ""):
         self.name = name
         self.name_full = name_full
         self.description = description
-        self.params = params
-        self.return_val = return_val
         
     def __eq__(self, other):
         return self.name == other.name
@@ -54,6 +53,24 @@ class Doc:
         # TODO(NeverLost): Convert to md
         return ""
 
+# TODO(Neverlost):
+# These should take a comment object/string
+class Doc_Property(Doc):
+    def __init__(self):
+        super().__init__()
+        self.functions = functions
+
+class Doc_Event(Doc):
+    def __init__(self):
+        super().__init__()
+        self.params = params
+
+class Doc_Function(Doc):
+    def __init__(self):
+        super().__init__()
+        self.params = params
+        self.return_val = return_val
+
 class File_Doc:
     # len("Scriptname ") = 11
     EXPECTED_NAME_INDEX = 11
@@ -63,19 +80,19 @@ class File_Doc:
         line = file.readline()
         
         if not line:
-            throw Exception()
+            raise Exception()
             
         if line.lower().find(file_name.lower()) != cls.EXPECTED_NAME_INDEX:
-            throw Exception()
+            raise Exception()
         
         file.seek(0, 0)
         doc = Doc.from_file(file)
 
-        if not doc
-            file_doc = cls(Doc(file_name, line))
-        elif not doc.type is Type.SCRIPT:
+        if issubclass(doc, Doc):
             file_doc = cls(Doc(file_name, line))
             file_doc.add(doc)
+        elif doc
+            file_doc = cls(Doc(file_name, line))
         else:
             file_doc = cls(doc)
 
@@ -83,8 +100,8 @@ class File_Doc:
 
     def __init__(self, doc):
         # Primary
-        if not isinstance(doc, Doc):
-            throw Exception()
+        if not type(doc, Doc):
+            raise Exception()
 
         self.doc = doc
         
@@ -96,16 +113,15 @@ class File_Doc:
     def isempty(self):
         return len(self.properties), len(self.events), len(self.functions) == 0
     
-    def add(self, doc):
-        if not isinstance(doc, Doc):
-            throw Exception()
-        
-        if doc.type is Type.PROPERTY
+    def add(self, doc):        
+        if isinstance(doc, Doc_Property):
             self.properties.append(doc)
-        elif doc.type is Type.EVENT:
+        elif isinstance(doc, Doc_Event):
             self.events.append(doc)
-        elif doc.type is Type.FUNCTION:
+        elif isinstance(doc, Doc_Function):
             self.functions.append(doc)
+        else:
+            raise Exception()
     
     def sort(self):
         self.properties.sort()
@@ -125,10 +141,10 @@ def generate_md(doc_data):
 
 def parse_file(file_path : str):
     if not file_path.lower().endswith(".psc"):
-        throw Exception()
+        raise Exception()
     
     if not path.isfile(file_path):
-        throw Exception()
+        raise Exception()
     
     file_name = path.splitext(path.basename(file_path))[0]
     
