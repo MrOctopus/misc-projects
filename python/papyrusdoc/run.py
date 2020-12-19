@@ -19,8 +19,9 @@ def parse_file(file_path):
     with open(file_path, 'r') as file:
         file_data = data.File_Data(file, file_path)
 
-        while doc := Doc().parse(file):            
+        while doc := Doc.from_file(file):            
             file_data.add(doc)
+            print(doc)
 
         return file_data
 

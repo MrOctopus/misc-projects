@@ -22,15 +22,16 @@ class File_Data:
         self.events = []
         self.functions = []
 
-        doc = Doc().parse(file)
+        doc = Doc.from_file(file)
 
         if not doc:
-            doc = Doc(Header(sanitize_line(line), file_name, 'scriptname'), Data())
+            doc = Doc(sanitize_line(line), file_name, Data())
         elif not isinstance(doc.data, Script):
             self.add(doc)
-            doc = Doc(Header(sanitize_line(line), file_name, 'scriptname'), Data())
+            doc = Doc(sanitize_line(line), file_name, Data())
 
         self.doc = doc
+        print(doc)
 
     def isempty(self):
         return len(self.properties), len(self.events), len(self.functions) == 0

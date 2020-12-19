@@ -1,5 +1,9 @@
 Scriptname nl_mcm extends SKI_ConfigBase
-{!!!!!!DO NOT RECOMPILE!!!!!!}
+{
+	!!!!!!DO NOT RECOMPILE!!!!!!
+	testing multi line
+	@author lol hahaha
+}
 
 ;@author NeverLost
 ;@version 1.0.0
@@ -14,6 +18,7 @@ endfunction
 
 string property MCM_EXT = ".nlset" autoreadonly
 string property MCM_PATH_SETTINGS
+{Testing}
 	string function get()
 		return "Data/NL_MCM/" + ModName + "/"
 	endfunction

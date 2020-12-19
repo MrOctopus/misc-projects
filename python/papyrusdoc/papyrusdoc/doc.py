@@ -1,19 +1,23 @@
 from .util import *
 
-class Data:
-    def __init__(self, desc = ""):
-        self.desc = desc
-
-    def parse(self, file):
-        # One Line comment
+class Var:
+    @classmethod
+    def _parse_var(cls, file, valid_types):
+        var_ = ""
         line = file.readline().strip()
 
-        if (end_index := line.find(Doc.END)) != -1:
-            self.description = line[1:end_index]
-            return None
+        line_split = line.split(' ')
+        var_ = line_split[0][1:]
 
-        # Multi line comment
-        while line:
+        if not var_ in valid_types:
+            raise Exception()
+
+        pass
+
+        desc = ""
+
+        while True:
+            prev_pos = file.tell()
             line = file.readline()
             
             # Malformed comment
@@ -23,169 +27,248 @@ class Data:
             line = line.strip()
 
             if not line:
-                self.desc += '\n'
                 continue
-            elif line[0] == Doc.END:
-                return None
-            elif line[0] == Doc.VAL:
-                return line
-            else:
-                self.desc += line + '\n'
 
-class Script(Data):
-    VALID = (
-        'author',
-        'version'
-    )
+            if line[0] == Doc.END:
+                return desc
 
-    def __init__(self, desc = "", author = "", version = ""):
-        super().__init__(desc)
-        self.author = author
-        self.version = version
+            if line[0] == Doc.VAL:
+                file.seek(prev_pos)
+                return False
 
-    def parse(self, file):
-        last_line = super().parse(file)
+            desc += line + '\n'
 
-        if not last_line: 
-            return self
+    @classmethod
+    def from_file(cls, file, valid_types):
+        var = cls._parse_var(file, valid_types)
 
-        #while line == Doc.VAR:
-        #    break
-        return self
+        if not var:
+            return None
 
-class Property(Data):
-    def __init__(self, desc = "", getter = None, setter = None):
-        super().__init__(desc)
-        self.getter = getter
-        self.setter = setter
+        return var
 
-class Event(Data):
-    VALID = (
-        'param'
-    )
+    def __init__(self, var, type, desc):
+        self.var_ = var_
+        self.type_ = type_
+        self.desc = desc
 
-    def __init__(self, desc = "", params = []):
-        super().__init__(desc)
-        self.params = params
+class Data:
+    NAME = ''
+    VALID_VARS = ()
 
-class Function(Data):
-    VALID = (
-        'param',
-        'return'
-    )
+    @classmethod
+    def _parse_desc(cls, file):
+        has_vars = False
+        desc = ""
 
-    def __init__(self, desc = "", params = [], return_val = ""):
-        super().__init__(desc)
-        self.params = params
-        self.return_val = return_val
+        # One Line comment
+        line = file.readline().strip()
 
-DATA_TYPES = {
-    'scriptname': Script,
-    'property': Property,
-    'event': Event,
-    'function': Function
-}
-DATA_TYPES_TUPLE = tuple(DATA_TYPES)
+        if line[-1] == Doc.END:
+            desc = line[1:-1]
+            return has_vars, desc
 
-class Header:
-    def __init__(self, decl = "", name = "", data_type = ""):
-        self.decl = decl
-        self.name = name
-        self.data_type = data_type
-
-    def _get_decl_type(self, decl_lower):
-        for key in DATA_TYPES_TUPLE:
-            type_index = decl_lower.find(key)
-            if type_index != -1:
-                return key
-
-        # Could not find type
-        raise Exception()
-
-    def _get_decl_name(self, decl_lower):
-        start_index = decl_lower.find(self.data_type)
-            
-        if start_index == -1:
-            raise Exception()
-
-        start_index = start_index + len(self.data_type) + 1
-
-        # TODO(NeverLost)
-        # Rewrite this.
-        # Horrible code
-        if self.data_type in DATA_TYPES_TUPLE[0:2]:
-            end_index = decl_lower.find(' ', start_index)
-
-            if end_index != -1:
-                return self.decl[start_index:end_index]
-            else:
-                return self.decl[start_index:]
-        
-        elif (end_index := decl_lower.find('(', start_index)) != -1:
-            return self.decl[start_index:end_index]
-
-        # Malformed header
-        raise Exception()
-
-    def parse(self, file):        
-        # TODO(NeverLost): This is not too readable
-        # Rewrite
-        # Find header
-        while True:
-            prev_pos = file.tell()
+        # Multi line comment
+        while True:                        
+            prev_pos = file.tell() 
             line = file.readline()
 
             if not line:
-                return None
+                raise Exception()
 
             line = line.strip()
 
             if not line:
                 continue
 
-            if line[0] is Doc.START:
+            if line[0] == Doc.END:
+                break
+            elif line[0] == Doc.VAR:
+                has_vars = True
                 file.seek(prev_pos)
                 break
+            else:
+                desc += line + '\n'
 
-            self.decl = line
+        return has_vars, desc[:-1]
+
+    @classmethod
+    def _parse_vars(cls, file):
+        vars_ = []
+        
+        while var := Var.from_file(file, cls.VALID_VARS):
+            if not var.type_ == 'param' and any(x._type == var._type for x in l):
+                raise Exception()
+
+            vars_.append(var)
+
+        return vars_
+
+    @classmethod
+    def from_file(cls, file):
+        has_vars, desc = cls._parse_desc(file)
+        vars_ = None
+
+        if has_vars:
+            vars_ = cls._parse_vars(file)
+
+        return cls(desc, vars_)
+
+    def __init__(self, desc, vars_):
+        self.desc = desc
+        self.vars_ = vars_
+
+    def __str__(self):
+        return "{}\n\n".format(self.desc)
 
 
-        self.decl = sanitize_line(self.decl)
-        decl_lower = self.decl.lower()
-        self.data_type = self._get_decl_type(decl_lower)
-        self.name = self._get_decl_name(decl_lower)
+class Script(Data):
+    NAME = 'scriptname'
+    VALID_VARS = (
+        'author',
+        'version'
+    )
 
-        return self
+    def __str__(self):
+        return super().__str__() + ""
 
+class Property(Data):
+    NAME = 'property'
+    VALID_VARS = (
+        'get',
+        'set',
+        'usage',
+        'context'
+    )
+    SIMPLE_ENDING = ('auto', 'autoreadonly')
+    EXT_ENDING = 'endproperty'
+
+class Event(Data):
+    NAME = 'event'
+    VALID_VARS = (
+        'param',
+        'usage',
+        'context'
+    )
+
+class Function(Data):
+    NAME = 'function'
+    VALID_VARS = (
+        'param',
+        'return',
+        'usage',
+        'context'
+    )
+
+Data_Types = {
+    Script.NAME : Script,
+    Property.NAME : Property,
+    Event.NAME : Event,
+    Function.NAME : Function
+}
+
+# Merge with data?
 class Doc:
     START = '{'
     END = '}'
     VAR = '@'
-    DOC_END = (END, VAR)
 
-    def __init__(self, header = None, data = None):
-        self.header = header
-        self.data = data
+    @classmethod
+    def _get_type(cls, header_lower):
+        for key in Data_Types:
+            type_index = header_lower.find(key)
+            if type_index != -1:
+                return key
+
+        # Could not find type
+        raise Exception()
+
+    @classmethod
+    def _get_name(cls, header, header_lower, type_):
+        start_index = header_lower.find(type_)
+            
+        if start_index == -1:
+            raise Exception()
+
+        start_index = start_index + len(type_) + 1
+
+        if type_ in (Script.NAME, Property.NAME):
+            end_index = header_lower.find(' ', start_index)
+
+            if end_index != -1:
+                return header[start_index:end_index]
+            else:
+                return header[start_index:]
         
-    def __eq__(self, other):
-        return self.header.name == other.header.name
+        elif (end_index := header_lower.find('(', start_index)) != -1:
+            return header[start_index:end_index]
 
-    def __lt__(self, other):
-        return self.header.name < other.header.name
-        
-    #def __str__(self):
-        # TODO(NeverLost): Convert to md
-    #    return ""
+        raise Exception()
 
-    def parse(self, file):
-        header = Header().parse(file)
+    @classmethod
+    def _parse_header(cls, file):      
+        prev_line = ""
+
+        while True:
+            prev_pos = file.tell()
+            line = file.readline()
+
+            if not line:
+                return ""
+
+            line = line.strip()
+
+            if line and line[0] is Doc.START:
+                file.seek(prev_pos)
+                return prev_line
+
+            prev_line = line
+
+    @classmethod
+    def _skip_property(cls, file):
+        while True:
+            line = file.readline()
+
+            if not line:
+                raise Exception()
+
+            line = line.strip()
+
+            if line and line.lower().startswith(Property.EXT_ENDING):
+                break
+
+    @classmethod
+    def from_file(cls, file):
+        header = cls._parse_header(file)
 
         if not header:
             return None
 
-        data = DATA_TYPES[header.data_type]().parse(file)
+        header_lower = header.lower()
 
-        print(vars(header))
-        print(data)
+        type_ = cls._get_type(header_lower)
+        name = cls._get_name(header, header_lower, type_)
+        
+        data = Data_Types[type_].from_file(file)
 
-        return self
+        if isinstance(data, Property) and not header_lower.endswith(Property.SIMPLE_ENDING):
+            cls._skip_property(file)
+
+        # Return directly
+        doc = Doc(header, name, data)
+
+        return doc
+
+    def __init__(self, header, name, data):
+        self.header = header
+        self.name = name
+        self.data = data
+        
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __lt__(self, other):
+        return self.name < other.name
+        
+    def __str__(self):
+        return "#### <a id=\"{}\"></a> `{}`\n".format(self.name, self.header) + str(self.data)
