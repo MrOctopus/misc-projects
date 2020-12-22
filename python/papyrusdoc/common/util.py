@@ -1,8 +1,10 @@
+from .defines import *
+
 def sanitize_line(line):
     start_index = 0
 
     while True:
-        index = line.find(';', start_index) 
+        index = line.find(COM_START, start_index) 
         if index == -1:
             break
 
