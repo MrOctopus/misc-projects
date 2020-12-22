@@ -34,7 +34,7 @@ def main():
     for file_path in sys.argv[1:]:
         try:
             file_data = parse_file(file_path)
-            file_data.generate_md_at(path.dirname(file_path))
+            file_data.create_md(path.dirname(file_path))
         except Exception as e:
             print(e)
 

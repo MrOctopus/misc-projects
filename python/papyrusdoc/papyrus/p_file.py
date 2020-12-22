@@ -54,7 +54,7 @@ class File_Data:
         self.events.sort()
         self.functions.sort()
 
-    def generate_md_at(self, file_path):
+    def create_md(self, file_path):
         if self.isempty():
             return
 
@@ -63,15 +63,45 @@ class File_Data:
         file_name = self.doc.name + '.md'
         file_path = path.join('./test', file_name)
         
+        # TODO(NeverLost): This is obviously written very very poorly
+        # will have to go back at some point for refactoring, but it works for now
         with open(file_path, 'w') as file:
             file.write("# Documentation ("+ self.doc.name + FILE_EXT + ")")
             file.write("\n## Overview")
 
+            # Index
             if len(self.properties) > 0:
                 file.write("\n### Properties")
+
+                for prop in self.properties:
+                    file.write(prop.to_index_md())
+
+                file.write("\n")
 
             if len(self.events) > 0:
                 file.write("\n### Events")
 
+                for event in self.events:
+                    file.write(event.to_index_md())
+
+                file.write("\n")
+
             if len(self.functions) > 0:
                 file.write("\n### Function")
+
+            # Description
+            if len(self.properties) > 0:
+                file.write("\n## Properties")
+
+                for prop in self.properties:
+                    file.write(prop.to_md())
+
+                file.write("\n")
+
+            if len(self.events) > 0:
+                file.write("\n## Events")
+
+                for event in self.events:
+                    file.write(event.to_md())
+
+                file.write("\n")

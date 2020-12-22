@@ -67,8 +67,8 @@ class Data:
         self.desc = desc
         self.vars_ = vars_
 
-    def __str__(self):
-        return "{}\n\n".format(self.desc)
+    def to_md(self):
+        return "\n" + self.desc
 
 
 class Script(Data):
@@ -78,7 +78,7 @@ class Script(Data):
         'version'
     )
 
-    def __str__(self):
+    def to_md(self):
         return super().__str__() + ""
 
 class Property(Data):

@@ -107,5 +107,8 @@ class Doc:
     def __lt__(self, other):
         return self.name < other.name
         
-    def __str__(self):
-        return "#### <a id=\"{}\"></a> `{}`\n".format(self.name, self.header) + str(self.data)
+    def to_index_md(self):
+        return "\n* [{0}](#{0})".format(self.name)
+
+    def to_md(self):
+        return "\n#### <a id=\"{}\"></a> `{}`".format(self.name, self.header) + self.data.to_md()
