@@ -1,5 +1,4 @@
 from os import path
-from common.defines import *
 from common.util import *
 from .p_data import *
 from .p_doc import *
@@ -33,7 +32,6 @@ class File_Data:
             doc = Doc(sanitize_line(line), file_name, Data())
 
         self.doc = doc
-        print(doc)
 
     def isempty(self):
         return len(self.properties) and len(self.events) and len(self.functions) == 0
@@ -61,20 +59,21 @@ class File_Data:
         self.sort()
 
         file_name = self.doc.name + '.md'
-        file_path = path.join('./test', file_name)
+        file_path = path.join(file_path, file_name)
         
         # TODO(NeverLost): This is obviously written very very poorly
         # will have to go back at some point for refactoring, but it works for now
         with open(file_path, 'w') as file:
-            file.write("# Documentation ("+ self.doc.name + FILE_EXT + ")")
-            file.write("\n## Overview")
+            file.write("# Documentation ("+ self.doc.name + ")")
+            file.write(self.doc.data.to_md())
+            file.write("\n\n## Overview")
 
             # Index
             if len(self.properties) > 0:
                 file.write("\n### Properties")
 
                 for prop in self.properties:
-                    file.write(prop.to_index_md())
+                    file.write(prop.to_md_index())
 
                 file.write("\n")
 
@@ -82,12 +81,17 @@ class File_Data:
                 file.write("\n### Events")
 
                 for event in self.events:
-                    file.write(event.to_index_md())
+                    file.write(event.to_md_index())
 
                 file.write("\n")
 
             if len(self.functions) > 0:
-                file.write("\n### Function")
+                file.write("\n### Functions")
+
+                for function in self.functions:
+                    file.write(function.to_md_index())
+
+                file.write("\n")
 
             # Description
             if len(self.properties) > 0:
@@ -103,5 +107,13 @@ class File_Data:
 
                 for event in self.events:
                     file.write(event.to_md())
+
+                file.write("\n")
+
+            if len(self.functions) > 0:
+                file.write("\n## Functions")
+
+                for function in self.functions:
+                    file.write(function.to_md())
 
                 file.write("\n")

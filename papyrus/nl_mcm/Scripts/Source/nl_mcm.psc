@@ -2,11 +2,9 @@ Scriptname nl_mcm extends SKI_ConfigBase
 {
 	!!!!!!DO NOT RECOMPILE!!!!!!
 	testing multi line
-	@author lol hahaha
+	@author Neverlost & Dunc
+	@version 1
 }
-
-;@author NeverLost
-;@version 1.0.0
 
 int function GetVersion()
     return 100
@@ -512,7 +510,11 @@ int function LoadMCMFromPreset(string preset_name, bool no_ext)
 endFunction
 
 function AddKeyMapOptionST(String a_stateName, String a_text, Int a_keycode, Int a_flags = 0)
-	{Workaround for stupid skyui conflict handling}
+	{
+		Workaround for stupid skyui conflict handling
+		@param test testing test
+		@return lololo
+	}
 	if a_keyCode != -1
 		string current_page = CurrentPage
 	

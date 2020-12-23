@@ -22,7 +22,6 @@ def parse_file(file_path):
 
         while doc := Doc.from_file(file):            
             file_data.add(doc)
-            print(doc)
 
         return file_data
 

@@ -1,15 +1,8 @@
 from common.defines import *
-from .p_data import Script, Property, Event, Function
+from .p_data import Script, Property, Event, Function, DATA_TYPES
 from common.util import *
 
 class Doc:
-    TYPES = {
-        Script.NAME : Script,
-        Property.NAME : Property,
-        Event.NAME : Event,
-        Function.NAME : Function
-    }
-
     @classmethod
     def from_file(cls, file):
         header = cls._parse_header(file)
@@ -22,9 +15,9 @@ class Doc:
         type_ = cls._get_type(header_lower)
         name = cls._get_name(header, header_lower, type_)
         
-        data = cls.TYPES[type_].from_file(file)
+        data = DATA_TYPES[type_].from_file(file)
 
-        if isinstance(data, Property) and not header_lower.endswith(Property.SIMPLE_ENDING):
+        if isinstance(data, Property) and not header_lower.endswith(Property.SIMPLE_END):
             cls._skip_property(file)
 
         # Return directly
@@ -32,9 +25,9 @@ class Doc:
 
         return doc
 
-    @classmethod
-    def _get_type(cls, header_lower):
-        for key in cls.TYPES:
+    @staticmethod
+    def _get_type(header_lower):
+        for key in DATA_TYPES:
             type_index = header_lower.find(key)
             if type_index != -1:
                 return key
@@ -42,8 +35,8 @@ class Doc:
         # Could not find type
         raise Exception()
 
-    @classmethod
-    def _get_name(cls, header, header_lower, type_):
+    @staticmethod
+    def _get_name(header, header_lower, type_):
         start_index = header_lower.find(type_)
             
         if start_index == -1:
@@ -64,8 +57,8 @@ class Doc:
 
         raise Exception()
 
-    @classmethod
-    def _parse_header(cls, file):      
+    @staticmethod
+    def _parse_header(file):      
         prev_line = ""
 
         while True:
@@ -83,8 +76,8 @@ class Doc:
 
             prev_line = line
 
-    @classmethod
-    def _skip_property(cls, file):
+    @staticmethod
+    def _skip_property(file):
         while True:
             line = file.readline()
 
@@ -93,7 +86,7 @@ class Doc:
 
             line = line.strip()
 
-            if line and line.lower().startswith(Property.EXT_ENDING):
+            if line and line.lower().startswith(Property.EXT_END):
                 break
 
     def __init__(self, header, name, data):
@@ -106,9 +99,9 @@ class Doc:
 
     def __lt__(self, other):
         return self.name < other.name
-        
-    def to_index_md(self):
-        return "\n* [{0}](#{0})".format(self.name)
 
     def to_md(self):
-        return "\n#### <a id=\"{}\"></a> `{}`".format(self.name, self.header) + self.data.to_md()
+        return "\n#### <a id=\"{}\"></a> `{}`{}\n***".format(self.name, self.header, self.data.to_md())
+
+    def to_md_index(self):
+        return "\n* [{0}](#{0})".format(self.name)
