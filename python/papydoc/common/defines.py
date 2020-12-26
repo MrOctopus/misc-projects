@@ -1,0 +1,5 @@
+FILE_EXT = '.psc'
+DOC_START = '{'
+DOC_END = '}'
+DOC_VAR = '@'
+COM_START = ';'
