@@ -20,20 +20,19 @@ def main():
 
     args = arg_parser.parse_args()
 
-    #if not path.isdir(args.path):
-    #    ext = path.splitext(args.path)[1].lower()
-#
-#        if ext != FILE_EXT:
-#           if ext:
-#              raise Exception()
-#
-#            args.path += FILE_EXT
-#    else:
-#        args.path += '*' + FILE_EXT
+    if path.isfile(args.path):
+        ext = path.splitext(args.path)[1].lower()
 
-#    files
+        if ext != FILE_EXT:
+            if ext:
+                raise Exception()
+
+            args.path += FILE_EXT
+
+    if args.rec:
+        args.path = path.join('**', args.path)
+
     file_paths = glob.iglob(args.path, recursive=args.rec)
-    #files = Path().rglob(args.path) if args.rec else Path.glob(args.path)
     readFiles = 0
 
     print(arg_parser.prog + ':')

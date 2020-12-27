@@ -36,12 +36,12 @@ class PapyDoc:
                 if container.append(file_doc):
                     break
 
-            file_name = path.splitext(path.basename(file.name)[0].lower())
+            file_name = path.splitext(path.basename(file.name))[0].lower()
             file_doc = Doc(sanitize_line(header), file_name, Script())
 
         while doc := Doc.from_file(file):
             for container in doc_containers:
-                if container.append(doc):
+                if container.insort(doc):
                     break
 
         return file_doc, doc_containers
@@ -59,10 +59,10 @@ class PapyDoc:
     def create_md_at(self, file_path):
         if self.isempty():
             return
-
+        
         file_name = self.doc.name + '.md'
         file_path = path.join(file_path, file_name)
-        
+
         with open(file_path, 'w') as file:
             file.write(self.to_md())
             file.write("\n\n## Overview")

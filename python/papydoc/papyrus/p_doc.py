@@ -1,4 +1,5 @@
 from collections import UserList
+from bisect import insort
 
 from common.defines import DOC_START
 from common.util import sanitize_line
@@ -23,10 +24,7 @@ class Doc:
         if isinstance(data, Property) and not header_lower.endswith(Property.SIMPLE_END):
             cls._skip_property(file)
 
-        # Return directly
-        doc = Doc(header, name, data)
-
-        return doc
+        return cls(header, name, data)
 
     @staticmethod
     def _get_type(header_lower):
@@ -118,6 +116,11 @@ class Doc_Container(UserList):
     def __add__(self, doc):
         if isinstance(doc.data, self.type_):
             return super().__add__(doc)
+        return False
+
+    def insort(self, doc):
+        if isinstance(doc.data, self.type_):
+            return insort(self, doc)
         return False
 
     def append(self, doc):
