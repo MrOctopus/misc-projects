@@ -1,5 +1,4 @@
-from common.defines import *
-from common.util import *
+from common.defines import DOC_VAR, DOC_END
 
 class Var:
     NAME = ''
@@ -37,7 +36,6 @@ class Var:
             prev_pos = file.tell()
             line = file.readline()
             
-            # Malformed comment
             if not line:
                 raise Exception()
             
@@ -46,11 +44,11 @@ class Var:
             if not line:
                 continue
 
-            if line[0] == DOC_VAR or DOC_END:
+            if line[0] == DOC_VAR or line[0] == DOC_END:
                 file.seek(prev_pos)
                 break
             
-            desc += line + '\n'
+            desc = desc + line + '\n'
 
         return type_, desc[:-1]
 

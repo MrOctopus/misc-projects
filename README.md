@@ -32,6 +32,10 @@ The script only works in an hardcoded format at the moment.
 
 ## Python
 
+### PaPyDoc
+A python program to generate markdown documentation from comments in papyrus script files.
+The included functionality largely resembles JavaDoc.
+
 ### DDS-Format-Genie.py
 A simple python script for determining the compression format used in a .dds file. Supports specific format filters and recursive traversal of .dds files.
 

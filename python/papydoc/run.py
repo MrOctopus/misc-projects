@@ -7,8 +7,10 @@ import argparse
 import glob
 
 from os import path
+
 from common.defines import FILE_EXT
-from papyrus.p_file import File_data
+
+from papyrus.p_file import PapyDoc
 
 def main():
     arg_parser = argparse.ArgumentParser(prog = "PaPyDoc")
@@ -30,26 +32,24 @@ def main():
 #        args.path += '*' + FILE_EXT
 
 #    files
-    files = glob.iglob(args.path, recursive=args.rec)
+    file_paths = glob.iglob(args.path, recursive=args.rec)
     #files = Path().rglob(args.path) if args.rec else Path.glob(args.path)
     readFiles = 0
 
     print(arg_parser.prog + ':')
-    print("     TRYING TO READ FILES:")
-    print()
 
-    for file in files:
-        print(file)
+    for file_path in file_paths:
+        print(file_path)
 
         try:
-            file_data = File_Data(file)
+            papy_doc = PapyDoc.from_file_path(file_path)
 
             if args.output:
-                file_data.create_md(args.output)
+                papy_doc.create_md_at(args.output)
             else:
-                file_data.create_md(path.dirname(file))
+                papy_doc.create_md_at(path.dirname(file_path))
 
-            ++readFiles
+            readFiles += 1
             print(readFiles)
         except Exception as e:
             print(e)

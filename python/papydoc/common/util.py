@@ -1,4 +1,4 @@
-from .defines import *
+from .defines import COM_START
 
 def sanitize_line(line):
     start_index = 0

@@ -1,9 +1,7 @@
 Scriptname nl_mcm extends SKI_ConfigBase
 {
-	!!!!!!DO NOT RECOMPILE!!!!!!
-	testing multi line
-	@author Neverlost & Dunc
-	@version 1
+	@author NeverLost
+	@version 1.0.0	
 }
 
 int function GetVersion()
@@ -15,8 +13,13 @@ endfunction
 ;--------------------------------------------------------
 
 string property MCM_EXT = ".nlset" autoreadonly
+{Standard setting extension}
+
 string property MCM_PATH_SETTINGS
-{Testing}
+{
+	Concats the standard file path and mod name.
+	@get Path to local mod settings folder
+}
 	string function get()
 		return "Data/NL_MCM/" + ModName + "/"
 	endfunction
@@ -26,6 +29,7 @@ endproperty
 float property SPINLOCK_TIMER = 0.4 autoreadonly
 float property BUFFER_TIMER = 2.0 autoreadonly
 int property LINE_LENGTH = 47 autoreadonly
+{Max line length for a mcm column}
 
 ; ERROR CODES
 int property OK = 1 autoreadonly
@@ -75,8 +79,7 @@ bool _mutex_page
 ;--------------------------------------------------------
 
 event OnGameReload()
-	{Workaround for load order fuckery of modules}
-		; Imagine F is a valid form and I is an invalid form
+	; Imagine F is a valid form and I is an invalid form
 	; --------
 	; If a module is unloaded the _modules array might look like this:
 	; FFFFIIIFFIIFFI
@@ -255,7 +258,15 @@ endEvent
 ; CRITICAL \ FUNCTIONS \
 ;--------------------------------------------------------
 
-int function _RegisterModule(nl_mcm_module module, string page_name, int z)				
+int function _RegisterModule(nl_mcm_module module, string page_name, int z)		
+{
+	Internal register module function. Please opt for using the official
+	api in the nl_mcm_module script instead.
+	@param module - Reference pointer to a module script
+	@param page_name - The page name which the module will be stored under
+	@param z - The Z-Index of the page. Pages are sorted in an ascending order
+	@return Error code
+}		
 	while _mutex_modules
 		Utility.WaitMenuMode(SPINLOCK_TIMER)
 	endwhile
@@ -369,6 +380,12 @@ int function _RegisterModule(nl_mcm_module module, string page_name, int z)
 endfunction
 
 int function _UnregisterModule(string page_name)
+{
+	Internal unregister module function. Please opt for using the official
+	api in the nl_mcm_module script instead.
+	@param page_name - The page name of the module we want to unregister
+	@return Error code
+}	
 	while _mutex_modules
 		Utility.WaitMenuMode(SPINLOCK_TIMER)
 	endwhile
@@ -418,6 +435,12 @@ int function _UnregisterModule(string page_name)
 endfunction
 
 int function SaveMCMToPreset(string preset_name)
+{
+	Calls the local SaveData function on all module scripts, storing the
+	resulting JObjects under the given file name.
+	@param preset_name - The preset/file name to store the settings under
+	@return Error code
+}
 	if !JContainers.isInstalled()
 		return ERROR
 	endif
@@ -463,6 +486,13 @@ int function SaveMCMToPreset(string preset_name)
 endFunction
 
 int function LoadMCMFromPreset(string preset_name, bool no_ext)
+{
+	Calls the local LoadData function on all module scripts, using the
+	JObjects loaded from the given file.
+	@param preset_name - The preset/file name to load settings from
+	@param no_ext - Does the supplied preset name contain a file extension?
+	@return Error code
+}
 	if !JContainers.isInstalled()
 		return ERROR
 	endif
@@ -510,11 +540,6 @@ int function LoadMCMFromPreset(string preset_name, bool no_ext)
 endFunction
 
 function AddKeyMapOptionST(String a_stateName, String a_text, Int a_keycode, Int a_flags = 0)
-	{
-		Workaround for stupid skyui conflict handling
-		@param test testing test
-		@return lololo
-	}
 	if a_keyCode != -1
 		string current_page = CurrentPage
 	
@@ -533,7 +558,6 @@ function AddKeyMapOptionST(String a_stateName, String a_text, Int a_keycode, Int
 endfunction
 
 function SetKeyMapOptionValueST(int a_keycode, bool no_update = false, string a_stateName = "")
-	{Workaround for stupid skyui conflict handling}
 	if a_keyCode != -1
 		string current_page = CurrentPage
 	
@@ -643,6 +667,14 @@ function RelayPageEvent(string state_name, int event_id, float f = -1.0, string 
 endfunction
 
 int function GetMCMSavedPresets(string[] presets, string default_fill, bool no_ext)
+{
+	Get an array containing the name of all saved presets.
+	@param presets - An empty/none list to store the results in
+	@param default_fill - A default string to fill the list with. Can be used
+	to create a "fake exit" button for mcm menus
+	@param no_ext - Should the resulting list of preset names have no extension?
+	@return Error code
+}
 	if !JContainers.isInstalled()
 		return ERROR
 	endif
@@ -672,6 +704,11 @@ int function GetMCMSavedPresets(string[] presets, string default_fill, bool no_e
 endfunction
 
 int function DeleteMCMSavedPreset(string preset_name)
+{
+	Delete a given preset from the settings folder. 
+	@param preset_name - The preset/file name to delete
+	@return Error code
+}
 	if !JContainers.isInstalled()
 		return ERROR
 	endif
@@ -692,6 +729,17 @@ int function DeleteMCMSavedPreset(string preset_name)
 endfunction
 
 function AddParagraph(string text, string begin_format = "", string end_format = "", int flags = 0x01)
+{
+	A convenience function to add a paragraph of text to the mcm page.
+	Text splitting occurs when the max line length is reached (#LINE_LENGTH),
+	or when a newline character (\n) is encountered.
+	@param text - The text to add as a paragraph to the page
+	@param begin_format - The format string to append at the start of each paragraph line.
+	Can be used to for example add html coloring to the paragraph text
+	@param end_format - The format string to append at the end of each paragraph line.
+	Can be used to for example add html coloring to the paragraph text
+	@param flags - The default flag of the added text options 
+}
 	int i = 0
 	int j = StringUtil.GetLength(text)
 	
@@ -736,12 +784,26 @@ function AddParagraph(string text, string begin_format = "", string end_format =
 endfunction
 
 function SetSplashScreen(string path, float x, float y)
+{
+	Set a splash screen to use for the "" page of the mcm menu.
+	@param path - File path of the splash screen
+	@param x - The x position of the splash screen
+	@param y - The y position of the splash screen
+}
 	_splash_path = path
 	_splash_x = x
 	_splash_y = y
 endfunction
 
 function SetSliderDialog(float value, float range_start, float range_end, float interval, float default)
+{
+	A convenience function to set all of the slider data using only 1 function.
+	@param value - The value the slider is set at
+	@param range_start - The start value of the slider
+	@param range_end - The end value of the slider
+	@param interval - The interval at which increments/decrements are done to the value
+	@param default - The default value of the slider
+}
 	SetSliderDialogRange(range_start, range_end)
     SetSliderDialogStartValue(value)
     SetSliderDialogInterval(interval)
@@ -749,12 +811,25 @@ function SetSliderDialog(float value, float range_start, float range_end, float 
 endFunction 
 
 function SetMenuDialog(string[] options, int start_i, int default_i)
+{
+	A convenience function to set all of the menu data using only 1 function.
+	@param options - The array containig the options for the menu
+	@param start_i - The start selection/index of the menu
+	@param default_i - The default selection/index for the menu
+}
     SetMenuDialogOptions(options)
 	SetMenuDialogStartIndex(start_i)
     SetMenuDialogDefaultIndex(default_i)
 endFunction
 
 function RefreshPages()
+{
+	Refreshes the mod's mcm pages. Useful for situations
+	where new pages/modules have been registered whilst
+	the player is still in the mod's mcm menu. Thus requiring
+	the page list to be reset.
+	@usage Use it when you need to refresh the mcm flash page list
+}
 	SetPage("", -1)
 	Ui.InvokeStringA(JOURNAL_MENU, MENU_ROOT + ".setPageNames", Pages)
 endFunction

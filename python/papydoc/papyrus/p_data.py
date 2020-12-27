@@ -1,5 +1,6 @@
-from common.defines import *
-from .p_var import *
+from common.defines import DOC_VAR, DOC_END
+
+from .p_var import Var, Author, Version, Get, Set, Usage, Param, Return
 
 class Data:
     NAME = ''
@@ -56,7 +57,7 @@ class Data:
     def _parse_vars(cls, file):
         vars_ = []
         
-        while (var := Var.from_file(file)) is not None:
+        while (var := Var.from_file(file)):
             if not var.__class__ in cls.VALID_VARS:
                 raise Exception()
 

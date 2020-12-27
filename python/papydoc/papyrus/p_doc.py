@@ -1,7 +1,9 @@
-from common.defines import *
-from .p_data import Script, Property, Event, Function, DATA_TYPES
-from common.util import *
 from collections import UserList
+
+from common.defines import DOC_START
+from common.util import sanitize_line
+
+from .p_data import Script, Property, Event, Function, DATA_TYPES
 
 class Doc:
     @classmethod
@@ -109,14 +111,25 @@ class Doc:
 
 class Doc_Container(UserList):
     def __init__(self, name, type_):
-        super().__init__(self, [])
+        super().__init__([])
         self.name = name
         self.type_ = type_
 
     def __add__(self, doc):
         if isinstance(doc.data, self.type_):
-            return super().__add__(self, doc)
+            return super().__add__(doc)
         return False
+
+    def append(self, doc):
+        if isinstance(doc.data, self.type_):
+            return super().append(doc) 
+        return False
+
+    def extend(self, doc_list):
+        for doc in doc_list:
+            if not isinstance(doc.data, self.type_):
+                return False
+        return super().extend(doc_list)
 
     def to_md(self):
         return "\n## " + self.name

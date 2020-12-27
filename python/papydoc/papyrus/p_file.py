@@ -1,60 +1,62 @@
 from os import path
-from common.util import *
-from .p_data import *
-from .p_doc import *
 
-class File_Data:
-    def __init__(self, file_path):
-        name, ext =  path.splitext(path.basename(file_path).lower())
+from common.util import sanitize_line
 
-        if not ext == FILE_EXT:
-            raise Exception()
+from .p_data import Script, Property, Event, Function
+from .p_doc import Doc, Doc_Container
+
+class PapyDoc:
+    @classmethod
+    def from_file_path(cls, file_path):
+        with open(file_path, 'r') as file:
+            file_doc, doc_containers = cls._parse_docs(file)
+            return cls(file_doc, doc_containers)
+    
+    @staticmethod
+    def _parse_docs(file):
+        header = file.readline()
+
+        if not header:
+            raise Exception("Has no content.")
         
-        if not path.isfile(file_path):
-            raise Exception()
-
-        file = open(file_path, 'r')
-        line = file.readline()
-        
-        if not line:
-            raise Exception()
-
-        if line.lower().find(name) != 11:
-            raise Exception()
-
         file.seek(0, 0)
+        file_doc = Doc.from_file(file)
         
-        self.doc = None
-        self.doc_containers = [
+        if not file_doc:
+            raise Exception("Has no documentation.")
+        
+        doc_containers = [
             Doc_Container("Properties", Property),
             Doc_Container("Events", Event),
             Doc_Container("Functions", Function)
         ]
 
-        # Data
-        doc = Doc.from_file(file)
+        if not isinstance(file_doc.data, Script):
+            for container in doc_containers:
+                if container.append(file_doc):
+                    break
 
-        if not doc:
-            doc = Doc(sanitize_line(line), file_name, Data())
-        elif not isinstance(doc.data, Script):
-            self.add(doc)
-            doc = Doc(sanitize_line(line), file_name, Data())
-
-        self.doc = doc
+            file_name = path.splitext(path.basename(file.name)[0].lower())
+            file_doc = Doc(sanitize_line(header), file_name, Script())
 
         while doc := Doc.from_file(file):
-            for container in self.doc_containers:
+            for container in doc_containers:
                 if container.append(doc):
                     break
 
-        container.sort() for container in self.doc_containers
+        return file_doc, doc_containers
 
-        file.close()
+    def __init__(self, doc, doc_containers):
+        self.doc = doc
+        self.doc_containers = doc_containers
+
+    def isempty(self):
+        return not any(self.doc_containers)
 
     def to_md(self):
-        return "# Documentation ({})".format(self.doc.name)
+        return "# Documentation ({}){}".format(self.doc.name, self.doc.data.to_md())
 
-    def create_md(self, file_path):
+    def create_md_at(self, file_path):
         if self.isempty():
             return
 
@@ -63,25 +65,24 @@ class File_Data:
         
         with open(file_path, 'w') as file:
             file.write(self.to_md())
-            file.write(self.doc.data.to_md())
             file.write("\n\n## Overview")
 
             # Index
-            for doc_container in self.doc_containers:
-                if doc_container:
-                    file.write(doc_container.to_md_index())
+            for container in self.doc_containers:
+                if container:
+                    file.write(container.to_md_index())
 
-                    for doc in doc_container:
+                    for doc in container:
                         file.write(doc.to_md_index())
 
                     file.write("\n")
 
             # Content
-            for doc_container in self.doc_containers:
-                if doc_container:
-                    file.write(doc_container.to_md())
+            for container in self.doc_containers:
+                if container:
+                    file.write(container.to_md())
 
-                    for doc in doc_container:
+                    for doc in container:
                         file.write(doc.to_md())
 
                     file.write("\n")
