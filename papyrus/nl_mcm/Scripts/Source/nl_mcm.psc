@@ -731,7 +731,7 @@ endfunction
 function AddParagraph(string text, string begin_format = "", string end_format = "", int flags = 0x01)
 {
 	A convenience function to add a paragraph of text to the mcm page.
-	Text splitting occurs when the max line length is reached (#LINE_LENGTH),
+	Text splitting occurs when the [max line length](#LINE_LENGTH) is reached,
 	or when a newline character (\n) is encountered.
 	@param text - The text to add as a paragraph to the page
 	@param begin_format - The format string to append at the start of each paragraph line.
