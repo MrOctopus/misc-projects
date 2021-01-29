@@ -1,0 +1,5 @@
+update LoveInterestFINScript with local gold counter (deduct from MarriageGoldEarned global variable)
+copy and paste Love interest on RelationshipMarriageFIN -> Do not allow reuse
+
+
+looks like the most important quest is RelationshipMarriageFIN?
