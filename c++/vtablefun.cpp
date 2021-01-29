@@ -24,6 +24,6 @@ int main()
     Test obj;
     uintptr_t* pointer = (uintptr_t*) &obj;
     pointer = (uintptr_t*) *pointer;
-    (void (*)()) *pointer)();
+    ((void (*)()) *pointer)();
     return 0;
 }
