@@ -3,7 +3,7 @@
 @author NeverLost
 
 Virtual table fun. 
-Let's call Test::hey() directly from the vtable.
+Let's call VirtualTableHack::Print() directly from the vtable.
 
 ---------------------------------------------------------*/
 
