@@ -12,6 +12,7 @@ Let's call VirtualTableHack::Print() directly from the vtable.
 
 using std::cout;
 using std::endl;
+using std::uintptr_t;
 
 class VirtualTableHack 
 {
