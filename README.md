@@ -10,11 +10,7 @@ Exploits a bug in the champollion.exe decompiler by randomizing the compiler deb
 
 ## Papyrus
 
-### nl_util.psc
-A papyrus utility script for key, value storage. Only requires SKSE. Example:
-* keyname2
-    - value
-    - value
+# Nothing atm
 
 ## Pascal
 
