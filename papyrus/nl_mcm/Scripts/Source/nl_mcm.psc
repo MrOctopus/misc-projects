@@ -670,7 +670,7 @@ int function GetMCMSavedPresets(string[] presets, string default_fill, bool no_e
 {
 	Get an array containing the name of all saved presets.
 	@param presets - An empty/none list to store the results in
-	@param default_fill - A default string to fill the list with. Can be used
+	@param default_fill - A default string to fill the list with. Used
 	to create a "fake exit" button for mcm menus
 	@param no_ext - Should the resulting list of preset names have no extension?
 	@return Error code
@@ -781,6 +781,16 @@ function AddParagraph(string text, string begin_format = "", string end_format =
 		
 		AddTextOption(begin_format + line + end_format, "", flags)
 	endwhile
+endfunction
+
+int function SetModName(string name)
+	if _initialized
+		return ERROR
+	endif
+	
+	ModName = name
+
+	return OK
 endfunction
 
 function SetSplashScreen(string path, float x, float y)

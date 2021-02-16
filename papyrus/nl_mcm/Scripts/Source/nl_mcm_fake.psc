@@ -1,11 +1,8 @@
 Scriptname nl_mcm extends SKI_ConfigBase
-{
+{!!!!!!DO NOT RECOMPILE!!!!!!
 	@author NeverLost
 	@version 1.0.0	
 }
-
-;@author NeverLost
-;@version 1.0.0
 
 int function GetVersion()
     return 100
@@ -185,6 +182,11 @@ endfunction
 
 function AddParagraph(string text, string begin_format = "", string end_format = "", int flags = 0x01)
 	Guard()
+endfunction
+
+int function SetModName(string name)
+	Guard()
+	return ERROR
 endfunction
 
 function SetSplashScreen(string path, float x, float y)
