@@ -38,11 +38,10 @@ int main()
     // Call first function located in vTable, result = ??? undefined
     ((void (*)()) *vPointer)();
     
-    // Why was the result undefined?
-    // How come? The cast should work for normal functions.
+    // Why was the result undefined? The cast should work for normal functions.
     // True, but in this case we are dealing with a function that is associated with an object.
-    // C++ hides this logic, but for every non-static function we have to pass a "self" variable.
-    // This, so we can set object variables.
+    // C++ hides this logic, but for every non-static function we have to pass a "this" variable.
+    // This, so we can actually set the object's variables.
 
     // Call first function located in vTable and send obj as first param, result = 1
     ((void (*)(VirtualTableHack)) *vPointer)(obj);
